@@ -1,2 +1,2 @@
 # Project-2E
- API version
+ Retrieve and send to JSON a random URL from my memes collection located [here](https://eylexander.xyz/Project-1D/).
