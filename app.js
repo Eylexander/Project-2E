@@ -1,6 +1,4 @@
 const http = require('http');
-const path = require('path');
-const fs = require('fs');
 const axios = require('axios');
 
 const moment = require('moment');
@@ -8,50 +6,6 @@ const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] 
 
 const hostname = 'localhost';
 const port = 8080;
-
-const createHTMLerror = `
-<html lang="en">
-
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="Eylexander's API" />
-        <meta name="author" content="Eylexander" />
-        <meta name="keywords" content="api,project_2b,memes" />
-        <title>Project 2B - API</title>
-    </head>
-
-    <style>
-        html {
-            overflow: hidden;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        h1 {
-            margin: 15% 15% 0 15%;
-            font-size: 4em;
-            text-align: center;
-        }
-
-        p {
-            margin: 0 0  15% 0;
-            font-size: 1.5em;
-            text-align: center;
-        }
-    </style>
-
-    <body>
-
-        <h1>404</h1>
-        <p>This does not exist!</p>
-    
-    </body>
-
-</html>
-`;
 
 const server = http.createServer(async (req, res) => {
     log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
