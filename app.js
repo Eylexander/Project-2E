@@ -6,7 +6,7 @@ const axios = require('axios');
 const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
 
-const hostname = 'api.eylexander.xyz';
+const hostname = 'localhost';
 const port = 8080;
 
 const createHTMLerror = `
