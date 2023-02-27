@@ -6,8 +6,8 @@ const axios = require('axios');
 const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
 
-const hostname = 'localhost';
-const port = 3000;
+const hostname = 'api.eylexander.xyz';
+const port = 8080;
 
 const createHTMLerror = `
 <html lang="en">
@@ -18,7 +18,6 @@ const createHTMLerror = `
         <meta name="description" content="Eylexander's API" />
         <meta name="author" content="Eylexander" />
         <meta name="keywords" content="api,project_2b,memes" />
-        <link href="./specs/favicon.ico" rel="icon" type="image/x-icon" />
         <title>Project 2B - API</title>
     </head>
 
@@ -59,109 +58,28 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method == 'GET') {
 
-        if (req.url.startsWith('/images/')) {
-            
-            var fileUrl = req.url;
-            if (fileUrl === '/specs/') {
-                res.statusCode = 404;
-                res.setHeader('Content-Type', 'text/html');
-                return res.end(createHTMLerror);
-            }
-            
-            var filePath = path.resolve(__dirname + fileUrl);
-            const fileExt = path.extname(filePath);
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
 
-            fs.access(filePath, fs.constants.F_OK, (err) => {
-                if (err) {
-                    res.statusCode = 404;
-                    res.setHeader('Content-Type', 'text/html');
-                    res.end(createHTMLerror);
-                    return log(`File ${filePath} not found!`);
-                } else {
-                    switch (fileExt) {
-                        case '.png':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'image/png');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.jpg':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'image/jpg');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.jpeg':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'image/jpeg');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.PNG':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'image/PNG');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.gif':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'image/gif');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.mp4':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'video/mp4');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.mov':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'video/mov');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.webm':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'video/webm');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.webp':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'image/webp');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        case '.MP4':
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'video/MP4');
-                            fs.createReadStream(filePath).pipe(res);
-                            break;
-                        default:
-                            res.statusCode = 404;
-                            res.setHeader('Content-Type', 'text/html');
-                            res.end(createHTMLerror);
-                            break;
-                    }
-                }
-            });
+        const { data } = await axios.get('https://eylexander.xyz/Project-1D/folder.json');
 
-        } else {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
+        const contents = data.map(o => o.contents);
+        const getFile = contents[0].map(o => o.name);
+        const getRandomMeme = getFile[Math.floor(Math.random() * getFile.length)]
 
-            const { data } = await axios.get('https://eylexander.xyz/Project-1D/folder.json');
-
-            const contents = data.map(o => o.contents);
-            const getFile = contents[0].map(o => o.name);
-            const getRandomMeme = getFile[Math.floor(Math.random() * getFile.length)]
-
-            if (getRandomMeme === 'folder.json') {
-                getRandomMeme = 'rest_here.mp4';
-            }
-
-            const response = {
-                meme: `https://eylexander.xyz/Project-1D/${getRandomMeme}`
-            };
-
-            res.writeHead(200, {
-                'Content-Type': 'application/json'
-            });
-            res.write(JSON.stringify(response));
-            res.end();
+        if (getRandomMeme === 'folder.json') {
+            getRandomMeme = 'rest_here.mp4';
         }
+
+        const response = {
+            meme: `https://eylexander.xyz/Project-1D/${getRandomMeme}`
+        };
+
+        res.writeHead(200, {
+            'Content-Type': 'application/json'
+        });
+        res.write(JSON.stringify(response));
+        res.end();
     }
 });
 
