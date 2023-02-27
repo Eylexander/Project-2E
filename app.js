@@ -4,7 +4,7 @@ const axios = require('axios');
 const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
 
-const hostname = 'localhost';
+const hostname = '127.0.0.1';
 const port = 8080;
 
 const server = http.createServer(async (req, res) => {
