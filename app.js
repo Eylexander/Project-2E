@@ -10,14 +10,17 @@ const requestListener = async function (req, res) {
     log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
 
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    
+    res.setHeader('Content-Type', 'application/json');   
 
     const { data } = await axios.get('https://eylexander.xyz/memes/folder.json');
 
     const contents = data.map(o => o.contents);
     const getFile = contents[0].map(o => o.name);
     const getRandomMeme = getFile[Math.floor(Math.random() * getFile.length)];
+
+    if (getRandomMeme === 'folder.json' || getRandomMeme === 'index.html') {
+        getRandomMeme = 'rest_here.mp4';
+    }
 
     const response = {
         name: getRandomMeme,
