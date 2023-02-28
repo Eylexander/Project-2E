@@ -19,7 +19,10 @@ const requestListener = async function (req, res) {
     const getFile = contents[0].map(o => o.name);
     const getRandomMeme = getFile[Math.floor(Math.random() * getFile.length)];
 
-    const response = { meme: `https://eylexander.xyz/memes/${getRandomMeme}` };
+    const response = {
+        name: getRandomMeme,
+        url: `https://eylexander.xyz/memes/${getRandomMeme}`
+    };
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(response));
