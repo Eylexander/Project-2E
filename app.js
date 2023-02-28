@@ -5,7 +5,7 @@ const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
 
 const hostname = '127.0.0.1';
-const port = 8080;
+const port = 8888;
 
 const server = http.createServer(async (req, res) => {
     log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
