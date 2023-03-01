@@ -11,6 +11,8 @@ const requestListener = async function (req, res) {
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');   
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
 
     const { data } = await axios.get('https://eylexander.xyz/memes/folder.json');
 
