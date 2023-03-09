@@ -14,15 +14,15 @@ const requestListener = async function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
 
-    const { data } = await axios.get('https://eylexander.xyz/memes/folder.json');
+    const { data } = await axios.get('https://eylexander.xyz/Collection/memes/folder.json');
 
     const contents = data.map(o => o.contents);
-    const getFile = contents[0].map(o => o.name);
+    const getFile = contents[0].map(o => o.type === 'file' && o.name);
 
     const args = new URL(req.url, `https://${req.headers.host}`);
 
     let file = null;
-    if (args.searchParams) {
+    if (args.searchParams.get('get') || args.searchParams.get('search')) {
         switch(args.searchParams.get('get')) {
             case 'jpg':
                 file = getFile.filter(o => o.endsWith('.jpg'));
@@ -64,16 +64,12 @@ const requestListener = async function (req, res) {
                 file = getFile.filter(o => ['mp4', 'webm', 'mov'].some(t => o.endsWith('.' + t)));
                 break;
 
-            default:
-                return res.end(JSON.stringify({ error: 'Invalid query' }));
-                break;
-
         }
         if (args.searchParams.get('search')) {
             if (file != null) {
-                file = file.filter(o => o.includes(args.searchParams.get('search')));
+                file = file.filter(o => o.toLocaleLowerCase().includes(args.searchParams.get('search').toLocaleLowerCase()));
             } else {
-                file = getFile.filter(o => o.includes(args.searchParams.get('search')));
+                file = getFile.filter(o => o.toLocaleLowerCase().includes(args.searchParams.get('search').toLocaleLowerCase()));
             }
         }
     } else {
@@ -84,16 +80,20 @@ const requestListener = async function (req, res) {
         }
     }
 
-    if (file == null) {
+    if (Array.isArray(file) && file.length === 0) {
+        return res.end(JSON.stringify({ error: 'Invalid query' }));
+    } else if (Array.isArray(file)) {
+        file = file[Math.floor(Math.random() * file.length)];
+    } else if (file === null || file === undefined) {
         return res.end(JSON.stringify({ error: 'Invalid query' }));
     }
 
     const response = {
         name: file,
-        url: `https://eylexander.xyz/memes/${file}`
+        url: `https://eylexander.xyz/Collection/memes/${file}`
     };
 
-    // res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(response));
 }
 
