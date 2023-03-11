@@ -22,7 +22,7 @@ const requestListener = async function (req, res) {
     const args = new URL(req.url, `https://${req.headers.host}`);
 
     let file = null;
-    if (args.searchParams.get('get') || args.searchParams.get('search')) {
+    if (args.searchParams.get('get') || args.searchParams.get('search') || args.searchParams.get('type')) {
         switch(args.searchParams.get('get')) {
             case 'jpg':
                 file = getFile.filter(o => o.endsWith('.jpg'));
@@ -63,13 +63,21 @@ const requestListener = async function (req, res) {
             case 'video':
                 file = getFile.filter(o => ['mp4', 'webm', 'mov'].some(t => o.endsWith('.' + t)));
                 break;
-
         }
+
         if (args.searchParams.get('search')) {
             if (file != null) {
                 file = file.filter(o => o.toLocaleLowerCase().includes(args.searchParams.get('search').toLocaleLowerCase()));
             } else {
                 file = getFile.filter(o => o.toLocaleLowerCase().includes(args.searchParams.get('search').toLocaleLowerCase()));
+            }
+        }
+
+        if (['array', 'list'].includes(args.searchParams.get('type'))) {
+            if (file != null) {
+                file = file;
+            } else {
+                file = getFile;
             }
         }
     } else {
@@ -80,17 +88,37 @@ const requestListener = async function (req, res) {
         }
     }
 
+
     if (Array.isArray(file) && file.length === 0) {
         return res.end(JSON.stringify({ error: 'Invalid query' }));
-    } else if (Array.isArray(file)) {
-        file = file[Math.floor(Math.random() * file.length)];
     } else if (file === null || file === undefined) {
         return res.end(JSON.stringify({ error: 'Invalid query' }));
+    } else if (!['array', 'list'].includes(args.searchParams.get('type')) && Array.isArray(file)) {
+        file = file[Math.floor(Math.random() * file.length)];
+    } else if (['array', 'list'].includes(args.searchParams.get('type')) && !Array.isArray(file)) {
+        file = [file];
+    }
+
+    let createURLS = [];
+
+    if (Array.isArray(file)) {
+        // for (let i = 0; i < file.length > 99 ? 100 : file.length; i++) {
+        for (let i = 0; i < file.length; i++) {
+            if (file[i] === undefined) break;
+
+            createURLS.push(`https://eylexander.xyz/Collection/memes/${file[i]}`);
+        }
+
+        // Cut the array to 100 files
+        // if (file.length > 100) file = file.slice(0, 100);
+
+    } else {
+        createURLS = `https://eylexander.xyz/Collection/memes/${file}`;
     }
 
     const response = {
         name: file,
-        url: `https://eylexander.xyz/Collection/memes/${file}`
+        url: createURLS
     };
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
