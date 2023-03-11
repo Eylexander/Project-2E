@@ -17,7 +17,7 @@ const requestListener = async function (req, res) {
     const { data } = await axios.get('https://eylexander.xyz/Collection/memes/folder.json');
 
     const contents = data.map(o => o.contents);
-    const getFile = contents[0].map(o => o.type === 'file' && o.name);
+    const getFile = contents[0].filter(o => o.type === 'file').map(o => o.name);
 
     const args = new URL(req.url, `https://${req.headers.host}`);
 
