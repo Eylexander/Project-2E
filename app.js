@@ -1,5 +1,6 @@
 const http = require('http');
 const axios = require('axios');
+const fs = require('fs');
 
 const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
@@ -14,7 +15,13 @@ const requestListener = async function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
 
-    const { data } = await axios.get('https://eylexander.xyz/Collection/memes/folder.json');
+    let data = null;
+    try {
+        data = JSON.parse(fs.readFileSync('../html/Collection/memes/folder.json'));
+    } catch (e) {
+        const response = await axios.get('https://eylexander.xyz/Collection/memes/folder.json');
+        data = response.data;
+    }
 
     const contents = data.map(o => o.contents);
     const getFile = contents[0].filter(o => o.type === 'file').map(o => o.name);
