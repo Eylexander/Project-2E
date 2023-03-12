@@ -10,8 +10,6 @@ const cacheTime = 3600 * 1000 * 12; // 12 hours cache time
 let cache = [];
 
 const requestListener = async function (req, res) {
-    log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
-
     const args = new URL(req.url, `https://${req.headers.host}`);
     
     // Check if the request method is valid
@@ -29,7 +27,7 @@ const requestListener = async function (req, res) {
 
 
     // Generate a cache key for the request
-    const cacheKey = args.searchParams;
+    const cacheKey = args.searchParams.toString();
 
     // Check if the response is already cached
     if (cache[cacheKey] && Date.now() - cache[cacheKey].time < cacheTime && ['array', 'list'].includes(args.searchParams.get('type'))) {
@@ -39,7 +37,7 @@ const requestListener = async function (req, res) {
 
     let data = null;
     try {
-        data = JSON.parse(fs.readFileSync('../folder.json'));
+        data = JSON.parse(fs.readFileSync('../memes/folder.json'));
     } catch (e) {
         const response = await axios.get('https://memes.eylexander.xyz/folder.json');
         data = response.data;
@@ -162,6 +160,11 @@ const requestListener = async function (req, res) {
 
 const server = http.createServer(requestListener);
 
+server.on('request', (req, res) => {
+    log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
+});
+
+
 server.listen(port, () => {
-    log(`Server running on port : ${port}`);
+    log(`Server running at http://${server.address().address}:${server.address().port}/`);
 });
