@@ -16,6 +16,8 @@ const requestListener = async function (req, res) {
     if (req.method !== 'GET') {
         res.statusCode = 405; // Method Not Allowed
         return res.end();
+    } else if (req.url === '/favicon.ico') {
+        return;
     }
 
     res.statusCode = 200;
