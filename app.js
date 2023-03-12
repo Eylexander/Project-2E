@@ -6,7 +6,7 @@ const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
 
 const port = 8080;
-const cacheTime = 3600 * 1000; // 1 hour cache time
+const cacheTime = 3600 * 1000 * 12; // 12 hours cache time
 let cache = [];
 
 const requestListener = async function (req, res) {
@@ -23,11 +23,13 @@ const requestListener = async function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
 
+    const args = new URL(req.url, `https://${req.headers.host}`);
+
     // Generate a cache key for the request
-    const cacheKey = req.url;
+    const cacheKey = args.searchParams;
 
     // Check if the response is already cached
-    if (cache[cacheKey] && Date.now() - cache[cacheKey].time < cacheTime) {
+    if (cache[cacheKey] && Date.now() - cache[cacheKey].time < cacheTime && ['array', 'list'].includes(args.searchParams.get('type'))) {
         log('Serving from cache');
         return res.end(JSON.stringify(cache[cacheKey].data));
     }
@@ -42,8 +44,6 @@ const requestListener = async function (req, res) {
 
     const contents = data.map(o => o.contents);
     const getFile = contents[0].filter(o => o.type === 'file').map(o => o.name);
-
-    const args = new URL(req.url, `https://${req.headers.host}`);
 
     let file = null;
     if (args.searchParams.get('get') || args.searchParams.get('search') || args.searchParams.get('type')) {
