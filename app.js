@@ -13,11 +13,22 @@ const requestListener = async function (req, res) {
     const args = new URL(req.url, `https://${req.headers.host}`);
     
     // Check if the request method is valid
-    if (req.method !== 'GET' || !args.pathname.startsWith('/v1')) {
+    if (req.method !== 'GET') {
         res.statusCode = 405; // Method Not Allowed
         return res.end();
     } else if (req.url === '/favicon.ico') {
         return;
+    } else if (req.url === '/') {
+
+        return fs.readFile('index.html', function(err, data) {
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.write(data);
+            return res.end();
+        });
+
+    } else if (!args.pathname.startsWith('/v1')) {
+        res.statusCode = 405;
+        return res.end();
     }
 
     res.statusCode = 200;
