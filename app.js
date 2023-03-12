@@ -6,14 +6,31 @@ const moment = require('moment');
 const log = message => {console.log(`[${moment().format('MM-DD HH:mm:ss.SSS')}] ${message}`)};
 
 const port = 8080;
+const cacheTime = 3600 * 1000; // 1 hour cache time
+let cache = [];
 
 const requestListener = async function (req, res) {
     log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
     
+    // Check if the request method is valid
+    if (req.method !== 'GET') {
+        res.statusCode = 405; // Method Not Allowed
+        return res.end();
+    }
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');   
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
+
+    // Generate a cache key for the request
+    const cacheKey = req.url;
+
+    // Check if the response is already cached
+    if (cache[cacheKey] && Date.now() - cache[cacheKey].time < cacheTime) {
+        log('Serving from cache');
+        return res.end(JSON.stringify(cache[cacheKey].data));
+    }
 
     let data = null;
     try {
@@ -97,11 +114,17 @@ const requestListener = async function (req, res) {
 
 
     if (Array.isArray(file) && file.length === 0) {
-        return res.end(JSON.stringify({ error: 'Invalid query' }));
+        res.statusCode = 400;
+        return res.end();
     } else if (file === null || file === undefined) {
-        return res.end(JSON.stringify({ error: 'Invalid query' }));
+        res.statusCode = 400;
+        return res.end();
+
+    // If 'type' parameter is not set to 'array' or 'list' and 'file' is an array, select a random file from the array
     } else if (!['array', 'list'].includes(args.searchParams.get('type')) && Array.isArray(file)) {
         file = file[Math.floor(Math.random() * file.length)];
+
+    // If 'type' parameter is set to 'array' or 'list' and 'file' is not an array, convert 'file' to an array
     } else if (['array', 'list'].includes(args.searchParams.get('type')) && !Array.isArray(file)) {
         file = [file];
     }
@@ -109,15 +132,11 @@ const requestListener = async function (req, res) {
     let createURLS = [];
 
     if (Array.isArray(file)) {
-        // for (let i = 0; i < file.length > 99 ? 100 : file.length; i++) {
         for (let i = 0; i < file.length; i++) {
             if (file[i] === undefined) break;
 
             createURLS.push(`https://eylexander.xyz/Collection/memes/${file[i]}`);
         }
-
-        // Cut the array to 100 files
-        // if (file.length > 100) file = file.slice(0, 100);
 
     } else {
         createURLS = `https://eylexander.xyz/Collection/memes/${file}`;
@@ -130,6 +149,12 @@ const requestListener = async function (req, res) {
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(response));
+
+    // Cache the response
+    cache[cacheKey] = {
+        data: response,
+        time: Date.now()
+    };
 }
 
 const server = http.createServer(requestListener);
