@@ -11,9 +11,11 @@ let cache = [];
 
 const requestListener = async function (req, res) {
     log('Request for ' + req.url + ' by method ' + req.method + ' on status ' + res.statusCode);
+
+    const args = new URL(req.url, `https://${req.headers.host}`);
     
     // Check if the request method is valid
-    if (req.method !== 'GET') {
+    if (req.method !== 'GET' || !args.pathname.startsWith('/api/v1')) {
         res.statusCode = 405; // Method Not Allowed
         return res.end();
     } else if (req.url === '/favicon.ico') {
@@ -25,7 +27,6 @@ const requestListener = async function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
 
-    const args = new URL(req.url, `https://${req.headers.host}`);
 
     // Generate a cache key for the request
     const cacheKey = args.searchParams;
@@ -38,9 +39,9 @@ const requestListener = async function (req, res) {
 
     let data = null;
     try {
-        data = JSON.parse(fs.readFileSync('../html/Collection/memes/folder.json'));
+        data = JSON.parse(fs.readFileSync('../folder.json'));
     } catch (e) {
-        const response = await axios.get('https://eylexander.xyz/Collection/memes/folder.json');
+        const response = await axios.get('https://memes.eylexander.xyz/folder.json');
         data = response.data;
     }
 
@@ -137,11 +138,11 @@ const requestListener = async function (req, res) {
         for (let i = 0; i < file.length; i++) {
             if (file[i] === undefined) break;
 
-            createURLS.push(`https://eylexander.xyz/Collection/memes/${file[i]}`);
+            createURLS.push(`https://memes.eylexander.xyz/${file[i]}`);
         }
 
     } else {
-        createURLS = `https://eylexander.xyz/Collection/memes/${file}`;
+        createURLS = `https://memes.eylexander.xyz/${file}`;
     }
 
     const response = {
