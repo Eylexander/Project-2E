@@ -13,7 +13,7 @@ const requestListener = async function (req, res) {
     const args = new URL(req.url, `https://${req.headers.host}`);
     
     // Check if the request method is valid
-    if (req.method !== 'GET' || !args.pathname.startsWith('/api/v1')) {
+    if (req.method !== 'GET' || !args.pathname.startsWith('/v1')) {
         res.statusCode = 405; // Method Not Allowed
         return res.end();
     } else if (req.url === '/favicon.ico') {
